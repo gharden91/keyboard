@@ -1,8 +1,15 @@
 # Keyboard
 
-> What this project is, how it's built and the rules that must not be broken
-> go here as the project takes shape. Keep this file to invariants; put the
-> depth in [`docs/`](docs/).
+A split-layout software keyboard for iPhone and iPad, with swipe typing and
+on-device English autocorrect. No network, no analytics. **The build spec is
+[`SPEC.md`](SPEC.md)** (discussed in issue #2; the road map is issue #1).
+Read its §3 (platform constraints) and §16 (hexagon: deferred, gated) before
+proposing anything that touches them.
+
+- [`docs/development.md`](docs/development.md): where Swift builds and tests
+  run (Mac vs. cloud sessions, which have no Swift toolchain by default)
+
+> Keep this file to invariants; put the depth in [`docs/`](docs/).
 
 ## This repository is public
 
