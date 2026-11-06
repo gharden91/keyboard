@@ -79,11 +79,16 @@ Shared/             # pure Swift package — ZERO UIKit imports
 
 ```swift
 protocol KeyLayout {
-    func keys(in bounds: CGSize, mode: KeyboardMode) -> [KeyRect]
+    var mode: KeyboardMode { get }   // the layout holds its mode (later: split ratio, gap)
+    func keys(in bounds: CGSize) -> [KeyRect]
     func hitTest(_ point: CGPoint, in bounds: CGSize) -> Key?
-    var keyCenters: [Key: CGPoint] { get }   // consumed by SwipeDecoder
+    func keyCenters(in bounds: CGSize) -> [Key: CGPoint]   // consumed by SwipeDecoder
 }
 ```
+
+Centers depend on bounds and mode, so they're a function, not a stored property. Split mode will also need to name the half a swipe started in, for example `keyCenters(in:half:)`. That arrives in M2, and nothing in the M1 shape may rule it out ([ADR-0002](docs/decisions/0002-keylayout-holds-its-mode.md)).
+
+**Module names:** SwiftPM targets carry a `KB` prefix (`KBLayout`, `KBLexicon`, `KBAutocorrect`, `KBSwipe`, `KBPersistence`) and map onto the folders above with `path:`. A bare `Layout` module collides with SwiftUI's `Layout` protocol in any file that imports both. The package uses Swift 5.9 tools and XCTest so it builds on the Mac and in a Linux container, and it takes `CGPoint`/`CGSize`/`CGRect` from Foundation, never CoreGraphics.
 
 ## 5. Layout engine
 
@@ -97,7 +102,8 @@ Three modes, one key model, `KeyboardMode` persisted per device class and orient
 
 **Rules:**
 - Keys defined in normalized 0–1 space, resolved to points at layout time.
-- Minimum hit target **42 × 54 pt**. Assert in unit tests across all device classes.
+- Hit-target **height ≥ 54 pt** everywhere; the keyboard's height is ours to set.
+- Hit-target **width**: in Full and Split mode keys fill the whole column pitch with no dead space between hit targets, and are **≥ 42 pt wherever the geometry allows** (iPad; landscape). On an iPhone in portrait, a 10-key row on a 375–440 pt screen can't reach 42 pt, so the width is exactly `width / 10`, as on Apple's keyboard. Compact mode has **no width floor**, because it's one-handed and narrow by design, but its keys still fill their pitch. Assert all of this in unit tests across all device classes ([ADR-0001](docs/decisions/0001-hit-width-fills-column-pitch.md)).
 - Gap is a spacer, not a key. Split ratio and gap width are user-adjustable in settings — this is the specific gap in KeyboardKit that its own reviewers complain about.
 - Split on a non-Duo iPhone is **not offered in v1** but must not be architecturally excluded: SplitKeyboard ships it in portrait, so treat it as a v1.1 mode, not a forbidden one.
 - Space-bar (and dismiss button) context menu toggles Split — the sanctioned pattern for a device whose hinge state you cannot read [^504418#57].
@@ -127,7 +133,7 @@ protocol SwipeDecoder {
 - Resample into the **active half's** coordinate space in Split mode. Passing whole-screen coordinates is the classic bug here.
 - Decode **< 60 ms** at touch-up, off the main thread. Top candidate via `setMarkedText`; alternatives in the strip.
 - Tapping a candidate replaces the marked text. Swipe-up-to-accept is v1.1.
-- **Layout-agnostic requirement:** the decoder must consume `layout.keyCenters` and assume nothing about a rectangular grid. This keeps hexagon, staggered rows, and any future geometry free.
+- **Layout-agnostic requirement:** the decoder must consume `layout.keyCenters(in:)` and assume nothing about a rectangular grid. This keeps hexagon, staggered rows, and any future geometry free.
 
 ## 7. Autocorrect & suggestions
 
