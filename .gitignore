@@ -1,0 +1,9 @@
+# Public repo: secrets never get committed. Local config with real values
+# lives in these files, which git ignores.
+.env
+.env.*
+!.env.example
+*.local.json
+*.pem
+*.key
+.claude/settings.local.json
