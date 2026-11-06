@@ -7,7 +7,8 @@ Read its §3 (platform constraints) and §16 (hexagon: deferred, gated) before
 proposing anything that touches them.
 
 - [`docs/development.md`](docs/development.md): where Swift builds and tests
-  run (Mac vs. cloud sessions, which have no Swift toolchain by default)
+  run (Mac vs. cloud sessions; use the `keyboard` cloud environment, which
+  installs Swift, so `swift test` on `Shared/` works there)
 
 > Keep this file to invariants; put the depth in [`docs/`](docs/).
 

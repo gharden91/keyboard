@@ -37,3 +37,5 @@ This repo is public, so nothing secret or private goes in a record.
 
 | # | Decision | Status | Scope |
 |---|---|---|---|
+| [0001](0001-hit-width-fills-column-pitch.md) | Key hit targets fill the column pitch; no 42 pt width floor on iPhone portrait or in Compact | Accepted | Layout |
+| [0002](0002-keylayout-holds-its-mode.md) | `KeyLayout` holds its mode; everything takes bounds; modules are KB-prefixed | Accepted | `Shared/` |
